@@ -32,4 +32,4 @@ local lsp_formatting = function(bufnr)
     })
 end
 
-vim.keymap.set("n", "<leader>f", lsp_formatting)
+vim.keymap.set("n", "fm", lsp_formatting)

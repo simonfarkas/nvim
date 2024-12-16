@@ -41,7 +41,6 @@ require('lspconfig').gleam.setup({})
 require('lspconfig').ocamllsp.setup({})
 require("lspconfig").tsserver.setup({})
 
-
 local cmp = require('cmp')
 
 cmp.setup({
@@ -54,5 +53,8 @@ cmp.setup({
       vim.snippet.expand(args.body)
     end,
   },
-  mapping = cmp.mapping.preset.insert({}),
+  mapping = cmp.mapping.preset.insert({
+	  ['<cr>'] = cmp.mapping.confirm({ select = true }),
+	  ["<C-Space>"] = cmp.mapping.complete(),
+  }),
 })
