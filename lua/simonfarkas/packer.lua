@@ -14,6 +14,33 @@ return require('packer').startup(function(use)
         end
     }
 
+    use({
+	  "nvimtools/none-ls.nvim",
+	  requires = { "nvim-lua/plenary.nvim" },
+	  config = function()
+	    local none_ls = require("null-ls") 
+	    local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
+
+	    none_ls.setup({
+	      sources = {
+		none_ls.builtins.formatting.prettierd, 
+	      },
+	      on_attach = function(client, bufnr)
+		if client.supports_method("textDocument/formatting") then
+		  vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+		  vim.api.nvim_create_autocmd("BufWritePre", {
+		    group = augroup,
+		    buffer = bufnr,
+		    callback = function()
+		      vim.lsp.buf.format({ bufnr = bufnr, async = false })
+		    end,
+		  })
+		end
+	      end,
+	    })
+	  end,
+	})
+
     use('nvim-telescope/telescope-file-browser.nvim')
 
     use({
@@ -29,17 +56,28 @@ return require('packer').startup(function(use)
             require("mason-lspconfig").setup({
                 ensure_installed = {
                     "lua_ls",
-                    "ts_ls", 
+                    "gopls",
+		    "ts_ls",
                     "eslint",
-                    "jsonls",
+                    "jsonls"
+                },
+            })
+
+            local lspconfig = require("lspconfig")
+
+            lspconfig.gopls.setup({
+                on_attach = function(client, bufnr)
+                end,
+                settings = {
+                    gopls = {
+                        analyses = {
+                            unusedparams = true,
+                        },
+                        staticcheck = true,
+                    },
                 },
             })
         end,
-    })
-
-    use({
-        'jose-elias-alvarez/null-ls.nvim',
-        requires = { 'nvim-lua/plenary.nvim' },
     })
 
     use({
@@ -51,6 +89,18 @@ return require('packer').startup(function(use)
     use({
         'nvim-treesitter/nvim-treesitter',
         run = ':TSUpdate',
+        config = function()
+            require('nvim-treesitter.configs').setup {
+                ensure_installed = { "lua", "typescript", "go", "json" },
+                sync_install = false,
+                auto_install = true,
+                highlight = {
+                    enable = true,
+                    disable = { "c", "rust" },
+                    additional_vim_regex_highlighting = false,
+                },
+            }
+        end
     })
 
     use({
@@ -58,20 +108,20 @@ return require('packer').startup(function(use)
         requires = { 'kyazdani42/nvim-web-devicons', opt = true },
     })
 
-    use({
-        'hrsh7th/nvim-cmp'
-    })
-
-    use({
-        'hrsh7th/cmp-nvim-lsp'
-    })
-
-    use({
-        'neovim/nvim-lspconfig'
-    })
+    use('hrsh7th/nvim-cmp')
+    use('hrsh7th/cmp-nvim-lsp')
+    use('neovim/nvim-lspconfig')
 
     use({
         'rose-pine/neovim',
         as = 'rose-pine',
     })
+
+    use({
+        'darrikonn/vim-gofmt',
+        config = function()
+            vim.g.go_fmt_command = "gofmt"
+        end
+    })
 end)
+

@@ -19,27 +19,34 @@ lspconfig_defaults.capabilities = vim.tbl_deep_extend(
 vim.api.nvim_create_autocmd('LspAttach', {
   desc = 'LSP actions',
   callback = function(event)
-    local opts = {buffer = event.buf}
+    local opts = { buffer = event.buf }
 
-    vim.keymap.set('n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
-    vim.keymap.set('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
-    vim.keymap.set('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
-    vim.keymap.set('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<cr>', opts)
-    vim.keymap.set('n', 'go', '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
-    vim.keymap.set('n', 'gr', '<cmd>lua vim.lsp.buf.references()<cr>', opts)
-    vim.keymap.set('n', 'gs', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
-    vim.keymap.set('n', '<F2>', '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
-    vim.keymap.set({'n', 'x'}, '<F3>', '<cmd>lua vim.lsp.buf.format({async = true})<cr>', opts)
-    vim.keymap.set('n', '<F4>', '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
+    vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+    vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+    vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+    vim.keymap.set('n', 'go', vim.lsp.buf.type_definition, opts)
+    vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+    vim.keymap.set('n', 'gs', vim.lsp.buf.signature_help, opts)
+    vim.keymap.set('n', '<F2>', vim.lsp.buf.rename, opts)
+    vim.keymap.set({ 'n', 'x' }, '<F3>', function()
+      vim.lsp.buf.format({ async = true })
+    end, opts)
+    vim.keymap.set('n', '<F4>', vim.lsp.buf.code_action, opts)
+
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      buffer = event.buf,
+      callback = function()
+        vim.lsp.buf.format({ async = false })
+      end,
+    })
   end,
 })
+
 
 -- You'll find a list of language servers here:
 -- https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md
 -- These are example language servers. 
-require('lspconfig').gleam.setup({})
-require('lspconfig').ocamllsp.setup({})
-require("lspconfig").tsserver.setup({})
 
 local cmp = require('cmp')
 
